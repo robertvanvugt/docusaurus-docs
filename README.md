@@ -83,9 +83,28 @@ Edit these fields early:
 * `baseUrl` (depends on whether you use user/org pages or project pages)
 * `organizationName` and `projectName` (used for GitHub Pages deploy)
 
+In our case:
+
+In my-docs/docusaurus.config.* set these (project pages style):
+
+* url: https://robertvanvugt.github.io
+* baseUrl: /docusaurus-docs/
+* organizationName: robertvanvugt
+* projectName: docusaurus-docs
+
+These fields are the core of GitHub Pages deployment for Docusaurus.
+
 ---
 
 ## 4. Decide how you’ll publish on GitHub Pages
+
+First lets configure Git Pages on the repo:
+
+In our repo, go to **Settings** | **Pages**
+
+Under **Build and deployment** | **Source**, select **GitHub Actions**.
+
+That enables Pages and creates the github-pages deployment target.
 
 There are **two** GitHub Pages shapes:
 
