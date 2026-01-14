@@ -2,9 +2,26 @@
 
 This document describes a step-by-step path to: **scaffold a Docusaurus site**, **move your repo’s Markdown into it**, and **publish via GitHub Pages** in line with the current Docusaurus install + deploy docs. ([docusaurus.io][1])
 
-## 0. Prereqs on Windows
+## 0. Prereqs
 
-### Install Node.js (required)
+### 0.1 GitHub
+
+#### Create a GitHub repo and push your Docusaurus site
+
+Create a GitHub repo and clone that repo to your development system.
+
+#### Enable GitHub Pages to deploy from Actions
+
+In GitHub:
+
+* Repo → **Settings** → **Pages**
+* **Build and deployment** → Source: **GitHub Actions** (not “deploy from branch”) ([GitHub][5])
+
+![GitHub Pages](./media/github_pages.png)
+
+### 0.2 Prereqs on Windows
+
+#### Install Node.js (required)
 
 1. Install **Node.js 18+** (LTS is best).
 2. Verify in a fresh terminal:
@@ -16,7 +33,7 @@ This document describes a step-by-step path to: **scaffold a Docusaurus site**, 
 
 Docusaurus requires Node 18+ (v3+). ([docusaurus.io][2])
 
-### Optional but recommended
+#### Optional but recommended
 
 * **Git** installed (so you can push + GitHub Actions).
 * VS Code (or alternate IDE).
@@ -28,10 +45,10 @@ Open PowerShell (or VS Code terminal) in the folder where you want the site.
 1. Run the official scaffolder:
 
    ```powershell
-   npx create-docusaurus@latest my-docs classic
+   npx create-docusaurus@latest pe-docs classic
    ```
 
-   This creates a new folder `my-docs` with a working site. ([docusaurus.io][1])
+   This creates a new folder `pe-docs` with a working site. ([docusaurus.io][1])
 
    When asked "Which language do you want to use?", select `TypeScript`.
 
@@ -40,6 +57,7 @@ Open PowerShell (or VS Code terminal) in the folder where you want the site.
    ```powershell
    cd my-docs
    npm install
+   npm install --save @docusaurus/theme-mermaid # Enable Mermaid functionality by adding plugin @docusaurus/theme-mermaid and setting markdown.mermaid to true in your docusaurus.config.js.
    npm run start
    ```
 
@@ -47,7 +65,424 @@ Open PowerShell (or VS Code terminal) in the folder where you want the site.
 
 ---
 
-## 2. Put your repo’s Markdown into Docusaurus
+## 2. Initial configuration and branding for Atos
+
+Open `docusaurus.config.js` (or `.ts`) in the site root. This is the main site config file. ([docusaurus.io][3])
+
+### Configure the main banner on the homepage.
+
+Find this section in the `docusaurus.config.js` file:
+
+```ts
+const config: Config = {
+  title: 'My Site',
+  tagline: 'Dinosaurs are cool',
+  favicon: 'img/favicon.ico',
+  ...
+}
+```
+
+Replace it with the follwowing content:
+
+```ts
+const config: Config = {
+  title: 'Atos Platform Engineering Documentation',
+  tagline: 'Platform Product documentation developed by the Atos C&MI BNN Public Cloud & Platform Engineering team.',
+  favicon: 'img/atos_logo_blue.svg',
+  ...
+}
+```
+
+### Set the production url of our site
+
+Find this section in the `docusaurus.config.js` file:
+
+```ts
+const config: Config = {
+  ...
+  // Set the production url of your site here
+  url: 'https://your-docusaurus-site.example.com',
+  // Set the /<baseUrl>/ pathname under which your site is served
+  // For GitHub pages deployment, it is often '/<projectName>/'
+  baseUrl: '/',
+
+  // GitHub pages deployment config.
+  // If you aren't using GitHub pages, you don't need these.
+  organizationName: 'facebook', // Usually your GitHub org/user name.
+  projectName: 'docusaurus', // Usually your repo name.
+  ...
+}
+```
+
+Replace it with the follwowing content:
+
+```ts
+const config: Config = {
+  ...
+  // Set the production url of your site here
+  url: 'https://nl-ams-platform-engineer.github.io',
+  // Set the /<baseUrl>/ pathname under which your site is served
+  // For GitHub pages deployment, it is often '/<projectName>/'
+  baseUrl: '/documentation/',
+
+  // GitHub pages deployment config.
+  // If you aren't using GitHub pages, you don't need these.
+  organizationName: 'NL-AMS-PLATFORM-ENGINEER', // Usually your GitHub org/user name.
+  projectName: 'documentation', // Usually your repo name.
+  ...
+}
+```
+
+### Add Mermaid theme
+
+Add this section in the `docusaurus.config.js` file right above the presets: [] section:
+
+```ts
+const config: Config = {
+  ...
+  // Added Mermaid theme
+  themes: ['@docusaurus/theme-mermaid'],
+
+  // Enable Mermaid in markdown files
+  markdown: {
+    mermaid: true,
+  },
+  ...
+}
+```
+
+### Customize the presets section
+
+Find this section in the `docusaurus.config.js` file:
+
+```ts
+const config: Config = {
+  ...
+  presets: [
+    [
+      'classic',
+      {
+        docs: {
+          sidebarPath: './sidebars.ts',
+          // Please change this to your repo.
+          // Remove this to remove the "edit this page" links.
+          editUrl:
+            'https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/',
+        },
+        blog: {
+          showReadingTime: true,
+          feedOptions: {
+            type: ['rss', 'atom'],
+            xslt: true,
+          },
+          // Please change this to your repo.
+          // Remove this to remove the "edit this page" links.
+          editUrl:
+            'https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/',
+          // Useful options to enforce blogging best practices
+          onInlineTags: 'warn',
+          onInlineAuthors: 'warn',
+          onUntruncatedBlogPosts: 'warn',
+        },
+        theme: {
+          customCss: './src/css/custom.css',
+        },
+      } satisfies Preset.Options,
+    ],
+  ],
+  ...
+}
+```
+
+Update the `editURL`, and set the `blog` to `false`:
+
+```ts
+const config: Config = {
+  ...
+  presets: [
+    [
+      'classic',
+      {
+        docs: {
+          sidebarPath: './sidebars.ts',
+          // Please change this to your repo.
+          // Remove this to remove the "edit this page" links.
+          editUrl:
+            'https://github.com/NL-AMS-PLATFORM-ENGINEER/documentation/tree/main/pe-docs/',
+        },
+        blog: false,
+        theme: {
+          customCss: './src/css/custom.css',
+        },
+      } satisfies Preset.Options,
+    ],
+  ],
+  ...
+};
+```
+
+### Customize the themeConfig section
+
+Find this section in the `docusaurus.config.js` file:
+
+```ts
+const config: Config = {
+  ...
+  themeConfig: {
+    // Replace with your project's social card
+    image: 'img/docusaurus-social-card.jpg',
+    colorMode: {
+      respectPrefersColorScheme: true,
+    },
+    navbar: {
+      title: 'My Site',
+      logo: {
+        alt: 'My Site Logo',
+        src: 'img/logo.svg',
+      },
+      items: [
+        {
+          type: 'docSidebar',
+          sidebarId: 'tutorialSidebar',
+          position: 'left',
+          label: 'Tutorial',
+        },
+        {to: '/blog', label: 'Blog', position: 'left'},
+        {
+          href: 'https://github.com/facebook/docusaurus',
+          label: 'GitHub',
+          position: 'right',
+        },
+      ],
+    },
+    footer: {
+      style: 'dark',
+      links: [
+        {
+          title: 'Docs',
+          items: [
+            {
+              label: 'Tutorial',
+              to: '/docs/intro',
+            },
+          ],
+        },
+        {
+          title: 'Community',
+          items: [
+            {
+              label: 'Stack Overflow',
+              href: 'https://stackoverflow.com/questions/tagged/docusaurus',
+            },
+            {
+              label: 'Discord',
+              href: 'https://discordapp.com/invite/docusaurus',
+            },
+            {
+              label: 'X',
+              href: 'https://x.com/docusaurus',
+            },
+          ],
+        },
+        {
+          title: 'More',
+          items: [
+            {
+              label: 'Blog',
+              to: '/blog',
+            },
+            {
+              label: 'GitHub',
+              href: 'https://github.com/facebook/docusaurus',
+            },
+          ],
+        },
+      ],
+      copyright: `Copyright © ${new Date().getFullYear()} My Project, Inc. Built with Docusaurus.`,
+    },
+    prism: {
+      theme: prismThemes.github,
+      darkTheme: prismThemes.dracula,
+    },
+  } satisfies Preset.ThemeConfig,
+  ...
+};
+```
+
+Update the section as follows:
+
+* Add the Mermaid theme config
+* Update the navbar (remove blog section and update title, logo, sidebarID, and label)
+* Update the footer
+
+```ts
+const config: Config = {
+  ...
+  themeConfig: {
+    // Replace with your project's social card
+    image: 'img/docusaurus-social-card.jpg',
+    colorMode: {
+      respectPrefersColorScheme: true,
+    },
+    // Added Mermaid theme config
+    mermaid: {
+      theme: {light: 'neutral', dark: 'forest'},
+    },
+    navbar: {
+      title: 'Atos Platform Engineering Documentation',
+      logo: {
+        alt: 'Atos Platform Engineering Documentation Logo',
+        src: 'img/atos_logo_blue.svg',
+      },
+      items: [
+        {
+          type: 'docSidebar',
+          sidebarId: 'documentationSidebar',
+          position: 'left',
+          label: 'Documentation',
+        },
+      ],
+    },
+    footer: {
+      style: 'dark',
+      links: [
+        {
+          title: 'Docs',
+          items: [
+            {
+              label: 'Home',
+              to: '/docs/intro',
+            },
+          ],
+        },
+        {
+          title: 'Community',
+          items: [
+            {
+              label: 'LinkedIn',
+              href: 'https://www.linkedin.com/company/1259/',
+            },
+            {
+              label: 'X',
+              href: 'https://x.com/atos',
+            },
+          ],
+        },
+        {
+          title: 'More',
+          items: [
+            {
+              label: 'Atos.net',
+              href: 'https://atos.net/en/services/cloud-and-modern-infrastructure',
+            },
+            {
+              label: 'GitHub',
+              href: 'https://github.com/NL-AMS-PLATFORM-ENGINEER/documentation',
+            },
+          ],
+        },
+      ],
+      copyright: `Copyright © ${new Date().getFullYear()} Atos International. Built with Docusaurus.`,
+    },
+    prism: {
+      theme: prismThemes.github,
+      darkTheme: prismThemes.dracula,
+    },
+  } satisfies Preset.ThemeConfig,
+};
+```
+
+### Sidebars (navigation)
+
+* The classic template usually auto-generates a sidebar from your docs folder, but you can explicitly control it in `sidebars.ts`.
+* If you want docs to reflect your repo’s folder structure, mirror it under `docs/`.
+
+Tip: If you already have a folder like `/docs` in your GitHub repo, you can **reuse it** by copying contents into Docusaurus’ `docs/` folder, or by restructuring so Docusaurus becomes the root and your docs live under `docs/`.
+
+Open `sidebars.ts`
+
+Find this section in the `docusaurus.config.js` file:
+
+```ts
+const sidebars: SidebarsConfig = {
+  // By default, Docusaurus generates a sidebar from the docs folder structure
+  tutorialSidebar: [{type: 'autogenerated', dirName: '.'}],
+};
+```
+
+Change the name of the sidebar as follows:
+
+```ts
+const sidebars: SidebarsConfig = {
+  // By default, Docusaurus generates a sidebar from the docs folder structure
+  documentationSidebar: [{type: 'autogenerated', dirName: '.'}],
+};
+```
+
+---
+
+## 3. Lets add some Atos branding
+
+Open `src/css/custom.css`. This is where the global Cascading Style Sheets (CSS) are defined.
+Modify the current content below:
+
+```css
+:root {
+  --ifm-color-primary: #2e8555;
+  --ifm-color-primary-dark: #29784c;
+  --ifm-color-primary-darker: #277148;
+  --ifm-color-primary-darkest: #205d3b;
+  --ifm-color-primary-light: #33925d;
+  --ifm-color-primary-lighter: #359962;
+  --ifm-color-primary-lightest: #3cad6e;
+  --ifm-code-font-size: 95%;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+}
+
+/* For readability concerns, you should choose a lighter palette in dark mode. */
+[data-theme='dark'] {
+  --ifm-color-primary: #25c2a0;
+  --ifm-color-primary-dark: #21af90;
+  --ifm-color-primary-darker: #1fa588;
+  --ifm-color-primary-darkest: #1a8870;
+  --ifm-color-primary-light: #29d5b0;
+  --ifm-color-primary-lighter: #32d8b4;
+  --ifm-color-primary-lightest: #4fddbf;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+}
+```
+
+To align to the Atos corporate branding. For now we just change the primary color:
+
+```css
+:root {
+  --ifm-color-primary: #0073E6; /* Atos Blue */
+  --ifm-color-primary-dark: #29784c;
+  --ifm-color-primary-darker: #277148;
+  --ifm-color-primary-darkest: #205d3b;
+  --ifm-color-primary-light: #33925d;
+  --ifm-color-primary-lighter: #359962;
+  --ifm-color-primary-lightest: #3cad6e;
+  --ifm-code-font-size: 95%;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+}
+
+/* For readability concerns, you should choose a lighter palette in dark mode. */
+[data-theme='dark'] {
+  --ifm-color-primary: #3DC7FF; /* Some other Blue */
+  --ifm-color-primary-dark: #21af90;
+  --ifm-color-primary-darker: #1fa588;
+  --ifm-color-primary-darkest: #1a8870;
+  --ifm-color-primary-light: #29d5b0;
+  --ifm-color-primary-lighter: #32d8b4;
+  --ifm-color-primary-lightest: #4fddbf;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+}
+```
+
+---
+
+## 5. Put your repo’s Markdown into Docusaurus
 
 Docusaurus expects docs in the `docs/` folder (by default in the classic template).
 
@@ -63,95 +498,17 @@ Docusaurus expects docs in the `docs/` folder (by default in the classic templat
 
    * Docusaurus uses front matter + file structure to build navigation.
 
-### Sidebars (navigation)
 
-* The classic template usually auto-generates a sidebar from your docs folder, but you can explicitly control it in `sidebars.js`.
-* If you want docs to reflect your repo’s folder structure, mirror it under `docs/`.
-
-Tip: If you already have a folder like `/docs` in your GitHub repo, you can **reuse it** by copying contents into Docusaurus’ `docs/` folder, or by restructuring so Docusaurus becomes the root and your docs live under `docs/`.
 
 ---
 
-## 3. Key configuration you’ll almost certainly edit
-
-Open `docusaurus.config.js` (or `.ts`) in the site root. This is the main site config file. ([docusaurus.io][3])
-
-Edit these fields early:
-
-* `title` / `tagline`
-* `url` (your GitHub Pages domain)
-* `baseUrl` (depends on whether you use user/org pages or project pages)
-* `organizationName` and `projectName` (used for GitHub Pages deploy)
-
-In our case:
-
-In my-docs/docusaurus.config.* set these (project pages style):
-
-* url: https://robertvanvugt.github.io
-* baseUrl: /docusaurus-docs/
-* organizationName: robertvanvugt
-* projectName: docusaurus-docs
-
-These fields are the core of GitHub Pages deployment for Docusaurus.
-
----
-
-## 4. Adding additional plugins
-
-### Mermaid Plugin
-
-Enable Mermaid functionality by adding plugin @docusaurus/theme-mermaid and setting markdown.mermaid to true in your docusaurus.config.js.
-
-```powershell
-npm install --save @docusaurus/theme-mermaid
-```
-
-```js
-export default {
-  markdown: {
-    mermaid: true,
-  },
-  themes: ['@docusaurus/theme-mermaid'],
-};
-```
-
-## 4. Decide how you’ll publish on GitHub Pages
-
-There are **two** GitHub Pages shapes:
-
-### A. User/Org pages
-
-Repo name: `USERNAME.github.io`
-
-* `url`: `https://USERNAME.github.io`
-* `baseUrl`: `/`
-
-### B. Project pages
-
-Repo name: anything, e.g. `my-docs`
-
-* `url`: `https://USERNAME.github.io`
-* `baseUrl`: `/my-docs/`
-
-This distinction matters because Docusaurus uses `url` + `baseUrl` to generate correct links.
-
----
-
-## 5. Publish with GitHub Actions (recommended)
+## 6. Publish with GitHub Actions (recommended)
 
 Docusaurus supports a static build and deployment flows; GitHub Pages commonly uses Actions now.
 
-### 5.1 Create a GitHub repo and push your Docusaurus site
 
 
-### 5.2 Enable GitHub Pages to deploy from Actions
-
-In GitHub:
-
-* Repo → **Settings** → **Pages**
-* **Build and deployment** → Source: **GitHub Actions** (not “deploy from branch”) ([GitHub][5])
-
-### 5.3 Add a GitHub Actions workflow
+### 6.3 Add a GitHub Actions workflow
 
 Create this file:
 
@@ -221,7 +578,7 @@ jobs:
 
 ---
 
-## 6. Build + verify locally before deploying
+## 7. Build + verify locally before deploying
 
 Run:
 
@@ -234,7 +591,7 @@ This verifies the production build output locally (recommended before pushing ch
 
 ---
 
-## 7. Typical “gotchas” when importing Markdown
+## 8. Typical “gotchas” when importing Markdown
 
 * **Relative links** between docs might need adjusting once under `docs/`.
 * If you use lots of GitHub-flavored Markdown features, check rendering (Docusaurus uses MDX/remark pipeline).
