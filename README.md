@@ -329,9 +329,9 @@ const config: Config = {
       theme: {light: 'neutral', dark: 'forest'},
     },
     navbar: {
-      title: 'Atos Platform Engineering Documentation',
+      title: 'Atos Platform Engineering',
       logo: {
-        alt: 'Atos Platform Engineering Documentation Logo',
+        alt: 'Atos Platform Engineering Logo',
         src: 'img/atos_logo_blue.svg',
       },
       items: [
@@ -351,7 +351,7 @@ const config: Config = {
           items: [
             {
               label: 'Home',
-              to: '/docs/intro',
+              to: '/docs/overview',
             },
           ],
         },
@@ -482,33 +482,99 @@ To align to the Atos corporate branding. For now we just change the primary colo
 
 ---
 
-## 5. Put your repo’s Markdown into Docusaurus
+## 4. Put your repo’s Markdown into Docusaurus
 
 Docusaurus expects docs in the `docs/` folder (by default in the classic template).
 
-### Common approach (simple + works well)
-
-1. Copy your existing `.md` / `.mdx` files into:
+You can now start creating markdown content in this folder and subfolders.
+You can also copy existing `.md` / `.mdx` files into:
 
    ```
    my-docs/docs/
    ```
 
-2. Make sure each doc has a unique **id** or filename, and ideally a title.
+Make sure each doc has a unique **id** or filename, and ideally a title.
 
    * Docusaurus uses front matter + file structure to build navigation.
 
+You only need to set id if:
 
+* You want to rename the file but keep old URLs	Preserve links
+* You import READMEs from other repos that all have README.md	Prevent collisions
+* You want short / custom URLs	Branding or stability
+* You have name collisions (intro.md in multiple folders)	Avoid ambiguity
+
+Example:
+
+```markdown
+---
+id: pe-architecture
+title: Platform Engineering Architecture
+---
+
+# Platform Engineering Architecture
+Continue document
+```
+
+Even if the file is README.md, the page id becomes pe-architecture.
 
 ---
+
+## 5. Organize and Cleanup
+
+### Create initial folder structure
+
+Under the `pe-docs/docs` folder we can organize our documentation.
+The scaffolding already created some sample content:
+
+```markdown
+docs/
+ ├─ intro.md
+ ├─ tutorial-basics/
+ |   ├─ _category_.json
+ |   ├─ congratulations.md
+ |   ├─ create-a-blog-post.md
+ |   ├─ create-a-document.md
+ |   ├─ create-a-page.md
+ |   ├─ deploy-your-site.md
+ |   └─ markdown-features.mdx
+ └─ tutorial-extras/
+     ├─ img/
+     |   └─ docsVersionDropdown.png
+     |   └─ localeDropdown.png
+     ├─ _category_.json
+     ├─ manage-docs-versions.md
+     └─ translate-your-site.md
+```
+
+Instead of deleting this altogether, we will move all scaffolded content to a new folder named `work-with-docusaurus`.
+
+Now lets rename the `docs/intro.md` to `docs/overview.md`.
+Add some information for this landing page.
+
+Create the following new folders:
+
+* `docs/achtitecture`
+* `docs/platform-products`
+
+You can add `_category_.json` files to each parent folder to organize the order in the sidenav.
+
+Now we can start adding content!
+
+### Cleanup blog folder
+
+Because we removed the blog section, its good to also remove the `blog` folder.
+Assuming you are in the `pe-docs` folder:
+
+```powershell
+rmdir blog -force
+```
 
 ## 6. Publish with GitHub Actions (recommended)
 
 Docusaurus supports a static build and deployment flows; GitHub Pages commonly uses Actions now.
 
-
-
-### 6.3 Add a GitHub Actions workflow
+### 6.1 Add a GitHub Actions workflow
 
 Create this file:
 
@@ -530,7 +596,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: my-docs
+        working-directory: pe-docs
 
     steps:
       - uses: actions/checkout@v4
@@ -541,7 +607,7 @@ jobs:
         with:
           node-version: 20
           cache: npm
-          cache-dependency-path: my-docs/package-lock.json
+          cache-dependency-path: pe-docs/package-lock.json
 
       - name: Install dependencies
         run: npm ci
@@ -552,7 +618,7 @@ jobs:
       - name: Upload Build Artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: my-docs/build
+          path: pe-docs/build
 
   deploy:
     name: Deploy to GitHub Pages
@@ -599,12 +665,7 @@ This verifies the production build output locally (recommended before pushing ch
 
 ---
 
-## If you tell me these 2 things, I’ll tailor the exact config values
-
-* Your GitHub repo name (and whether it will be `USERNAME.github.io` or a normal repo)
-* Where your Markdown lives today (root, `/docs`, multiple folders)
-
-Even without that, the steps above will get you from zero → local site → GitHub Pages-ready.
+## References
 
 [1]: https://docusaurus.io/docs/installation "Installation"
 [2]: https://docusaurus.io/docs/3.1.1/installation "Installation"
