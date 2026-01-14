@@ -1,47 +1,42 @@
 ---
 sidebar_position: 1
+title: Platform Products Documentation
 ---
 
-# Tutorial Intro
+# Platform Products Documentation
 
-Let's discover **Docusaurus in less than 5 minutes**.
+This site provides the official documentation for the **platform products** developed and maintained by the Public Cloud & Platform Engineering team.
 
-## Getting Started
+These platform products are reusable, cloud-native building blocks designed to accelerate teams across the organization by providing secure, compliant, and opinionated “paved paths” for common cloud use cases.
 
-Get started by **creating a new site**.
+They cover areas such as:
 
-Or **try Docusaurus immediately** with **[docusaurus.new](https://docusaurus.new)**.
+- **Managed Landing Zones** — standardized Azure foundations with governance, security, and networking baked in.
+- **CloudOps** — operational capabilities for monitoring, security, compliance, lifecycle management, and automation.
+- Platform services and integrations that enable teams to build, deploy, and operate workloads safely and consistently.
 
-### What you'll need
+## Purpose of this site
 
-- [Node.js](https://nodejs.org/en/download/) version 20.0 or above:
-  - When installing Node.js, you are recommended to check all checkboxes related to dependencies.
+The goal of this documentation is to:
 
-## Generate a new site
+- Make platform capabilities **discoverable** and easy to understand.
+- Provide clear guidance on how to **consume and integrate** platform products.
+- Explain design principles, constraints, and operational responsibilities.
+- Enable teams to self-serve wherever possible.
 
-Generate a new Docusaurus site using the **classic template**.
+This site is intended for engineers, architects, product teams, and operations teams who build on top of the platform or integrate with it.
 
-The classic template will automatically be added to your project after you run the command:
+## Scope
 
-```bash
-npm init docusaurus@latest my-website classic
-```
+The documentation focuses on:
 
-You can type this command into Command Prompt, Powershell, Terminal, or any other integrated terminal of your code editor.
+- How platform products are designed and how they should be used.
+- Interfaces, inputs, outputs, and integration patterns.
+- Supported use cases and non-goals.
+- Operational and compliance considerations where relevant.
 
-The command also installs all necessary dependencies you need to run Docusaurus.
+It does **not** aim to replace application-level documentation or team-specific runbooks, but instead acts as the shared reference for the platform itself.
 
-## Start your site
+---
 
-Run the development server:
-
-```bash
-cd my-website
-npm run start
-```
-
-The `cd` command changes the directory you're working with. In order to work with your newly created Docusaurus site, you'll need to navigate the terminal there.
-
-The `npm run start` command builds your website locally and serves it through a development server, ready for you to view at http://localhost:3000/.
-
-Open `docs/intro.md` (this page) and edit some lines: the site **reloads automatically** and displays your changes.
+If you have questions, feedback, or improvement ideas, please reach out to the Platform Engineering team or open an issue in the corresponding repository.

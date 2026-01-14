@@ -1,4 +1,6 @@
-# Azure Tasks App: Full-Stack Cloud-Native Project
+# Azure Tasks App
+
+Azure Tasks App: Full-Stack Cloud-Native Project
 
 **Goal:** Build a simple but real **Task Manager** to learn modern full-stack development and Azure deployment end-to-end.
 
@@ -11,6 +13,18 @@
 * **Future-ready:** Easily move backend to AKS later
 
 > This guide assumes no prior knowledge. Every step explains **what we’re doing** and **why we’re doing it** this way.
+
+:::tip[Tip]
+
+This guide assumes no prior knowledge. Every step explains **what we’re doing** and **why we’re doing it** this way.
+
+:::
+
+:::danger[Warning]
+
+You might like it a lot and spend a lot of time coding...
+
+:::
 
 ---
 
