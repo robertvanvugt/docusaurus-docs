@@ -1,9 +1,9 @@
 ---
 sidebar_position: 1
-title: Platform Products Documentation
+title: Introduction
 ---
 
-# Platform Products Documentation
+# Introduction
 
 This site provides the official documentation for the **platform products** developed and maintained by the Public Cloud & Platform Engineering team.
 

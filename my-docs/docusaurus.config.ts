@@ -35,6 +35,14 @@ const config: Config = {
     locales: ['en'],
   },
 
+  // Added Mermaid theme
+  themes: ['@docusaurus/theme-mermaid'],
+
+  // Enable Mermaid in markdown files
+  markdown: {
+    mermaid: true,
+  },
+
   presets: [
     [
       'classic',
@@ -60,6 +68,10 @@ const config: Config = {
     colorMode: {
       respectPrefersColorScheme: true,
     },
+    // Added Mermaid theme config
+    mermaid: {
+      theme: {light: 'neutral', dark: 'forest'},
+    },
     navbar: {
       title: "Platform Product Documentation",
       logo: {
@@ -82,7 +94,7 @@ const config: Config = {
           title: 'Docs',
           items: [
             {
-              label: 'Tutorial',
+              label: 'Home',
               to: '/docs/intro',
             },
           ],
@@ -119,6 +131,7 @@ const config: Config = {
     prism: {
       theme: prismThemes.github,
       darkTheme: prismThemes.dracula,
+      additionalLanguages: ['powershell', 'mermaid', 'yaml', 'json', 'bash'], // Added powershell and some other languages we commonly use
     },
   } satisfies Preset.ThemeConfig,
 };

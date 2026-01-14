@@ -12,8 +12,6 @@ Azure Tasks App: Full-Stack Cloud-Native Project
 * **CI/CD:** GitHub Actions
 * **Future-ready:** Easily move backend to AKS later
 
-> This guide assumes no prior knowledge. Every step explains **what we’re doing** and **why we’re doing it** this way.
-
 :::tip[Tip]
 
 This guide assumes no prior knowledge. Every step explains **what we’re doing** and **why we’re doing it** this way.

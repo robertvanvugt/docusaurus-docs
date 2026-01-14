@@ -96,6 +96,25 @@ These fields are the core of GitHub Pages deployment for Docusaurus.
 
 ---
 
+## 4. Adding additional plugins
+
+### Mermaid Plugin
+
+Enable Mermaid functionality by adding plugin @docusaurus/theme-mermaid and setting markdown.mermaid to true in your docusaurus.config.js.
+
+```powershell
+npm install --save @docusaurus/theme-mermaid
+```
+
+```js
+export default {
+  markdown: {
+    mermaid: true,
+  },
+  themes: ['@docusaurus/theme-mermaid'],
+};
+```
+
 ## 4. Decide how you’ll publish on GitHub Pages
 
 There are **two** GitHub Pages shapes:

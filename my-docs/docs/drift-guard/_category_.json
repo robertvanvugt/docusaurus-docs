@@ -1,0 +1,8 @@
+{
+  "label": "Drift Guard",
+  "position": 3,
+  "link": {
+    "type": "generated-index",
+    "description": "Step-by-step guidance for building a full-stack tasks app."
+  }
+}
