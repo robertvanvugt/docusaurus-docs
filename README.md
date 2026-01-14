@@ -98,14 +98,6 @@ These fields are the core of GitHub Pages deployment for Docusaurus.
 
 ## 4. Decide how you’ll publish on GitHub Pages
 
-First lets configure Git Pages on the repo:
-
-In our repo, go to **Settings** | **Pages**
-
-Under **Build and deployment** | **Source**, select **GitHub Actions**.
-
-That enables Pages and creates the github-pages deployment target.
-
 There are **two** GitHub Pages shapes:
 
 ### A. User/Org pages
@@ -132,16 +124,6 @@ Docusaurus supports a static build and deployment flows; GitHub Pages commonly u
 
 ### 5.1 Create a GitHub repo and push your Docusaurus site
 
-From the `my-docs` folder:
-
-```powershell
-git init
-git add .
-git commit -m "Initial Docusaurus site"
-git branch -M main
-git remote add origin <your-repo-url>
-git push -u origin main
-```
 
 ### 5.2 Enable GitHub Pages to deploy from Actions
 
@@ -158,8 +140,65 @@ Create this file:
 .github/workflows/deploy.yml
 ```
 
-Use the official Docusaurus deployment guidance as your baseline. ([docusaurus.io][4])
-(If you want, paste me your repo name + whether it’s user/org pages or project pages, and I’ll tailor the exact `url/baseUrl` and workflow content.)
+```yaml
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    name: Build Docusaurus
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: my-docs
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: my-docs/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build website
+        run: npm run build
+
+      - name: Upload Build Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: my-docs/build
+
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: build
+
+    permissions:
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+```
+
+> **Tip!** Use the official Docusaurus deployment guidance as your baseline. ([docusaurus.io][4])
 
 ---
 
