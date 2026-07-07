@@ -665,6 +665,274 @@ This verifies the production build output locally (recommended before pushing ch
 
 ---
 
+## 9. Add a Video Gallery (Demo's page)
+
+The site includes a **Demo's** page accessible from the top navigation bar. It renders a responsive video gallery with tag-based filtering, supporting both Microsoft Stream/SharePoint embed URLs and direct video files (via `react-player`).
+
+### 9.1 Install react-player
+
+From the **repository root** (not `pe-docs`), install the `react-player` package:
+
+```bash
+npm install react-player
+```
+
+This adds the dependency to the root `package.json`. The `react-player` library supports YouTube, Vimeo, Twitch, Spotify, TikTok, and direct video files (`.mp4`, `.webm`, etc.).
+
+> **Note:** `react-player` does **not** support Microsoft Stream / SharePoint embed URLs natively. The `VideoGallery` component handles these separately using an `<iframe>` (of all things...).
+
+### 9.2 Project structure
+
+The video gallery feature consists of these files:
+
+```
+pe-docs/src/
+ ├─ data/
+ │   └─ demos.ts                        # Video data & Video type definition
+ ├─ components/
+ │   └─ VideoGallery/
+ │       ├─ index.tsx                    # Gallery component (filtering & layout)
+ │       ├─ VideoCard.tsx                # Single video card component
+ │       └─ styles.module.css            # CSS module for grid, cards, tags
+ └─ pages/
+     └─ demos.tsx                        # /demos page (wired to navbar)
+```
+
+The gallery is split into two components: `index.tsx` handles tag filtering and the grid layout, while `VideoCard.tsx` owns the rendering of a single video card (embed detection, player, info, and tags).
+
+### 9.3 Add the navbar item
+
+In `docusaurus.config.ts`, add a new item to the `navbar.items` array:
+
+```ts
+navbar: {
+  ...
+  items: [
+    {
+      type: 'docSidebar',
+      sidebarId: 'documentationSidebar',
+      position: 'left',
+      label: 'Docs',
+    },
+    {
+      to: '/demos',
+      label: "Demo's",
+      position: 'left',
+    },
+  ],
+},
+```
+
+### 9.4 Managing videos
+
+To add, remove, or update videos, edit `src/data/demos.ts`. Each video entry has the following fields:
+
+| Field         | Required | Description                                                    |
+| ------------- | -------- | -------------------------------------------------------------- |
+| `title`       | Yes      | Display title shown below the video player                     |
+| `url`         | Yes      | Video URL (embed URL for Stream, direct URL for files/YouTube) |
+| `description` | No       | Short description shown below the title                        |
+| `tags`        | No       | Array of tag strings used for filtering                        |
+
+Example:
+
+```ts
+export const demoVideos: Video[] = [
+  {
+    title: 'Platform Engineering Overview',
+    url: 'https://atos365.sharepoint.com/sites/BNNCMIPO/_layouts/15/embed.aspx?UniqueId=...',
+    description: 'Standardized, Secure and Scalable Infrastructure Provisioning.',
+    tags: ['platform', 'kratix', 'backstage'],
+  },
+];
+```
+
+### 9.5 Supported video sources
+
+| Source                          | URL format                                                                 | Rendered with     |
+| ------------------------------- | -------------------------------------------------------------------------- | ----------------- |
+| Microsoft Stream / SharePoint   | `https://{tenant}.sharepoint.com/sites/{site}/_layouts/15/embed.aspx?...`  | `<iframe>`        |
+| YouTube                         | `https://www.youtube.com/watch?v=...`                                      | `react-player`    |
+| Vimeo                           | `https://vimeo.com/...`                                                    | `react-player`    |
+| Direct video file               | `https://example.com/video.mp4`                                            | `react-player`    |
+
+> **Important:** For SharePoint videos, always use the **embed URL** from the SharePoint "Embed" dialog (`_layouts/15/embed.aspx?UniqueId=...`). The regular sharing URL (`:v:/r/sites/...`) will be blocked by SharePoint's `X-Frame-Options` header and fail to load in an iframe.
+
+### 9.6 Tag-based filtering
+
+Videos can be tagged for easy filtering:
+
+* Tags are defined per video in `src/data/demos.ts` using the `tags` field.
+* Tags appear as pill-shaped buttons above the video grid.
+* Clicking a tag toggles it as a filter. Multiple selected tags use **AND** logic (a video must have all selected tags to be shown).
+* A **Clear filters** button appears when any filter is active.
+* Each video card also displays its tags below the description.
+
+---
+
+## 10.0 Image optimization
+
+Install ImageMagick
+
+```powershell
+# Install ImageMagick
+winget install ImageMagick.ImageMagick
+
+# Find install location
+Get-ChildItem "C:\Program Files" -Recurse -Filter magick.exe -ErrorAction SilentlyContinue
+
+# Add ImageMagick location to the path
+$env:Path += ";C:\Program Files\ImageMagick-7.1.2-Q16-HDRI" # Path may be different
+```
+
+```powershell
+
+$svgPath = Join-Path $PWD "static\img\atos_agentic_ai.svg"
+$pngPath = Join-Path $PWD "static\img\atos_agentic_ai.png"
+
+$svgPath = Join-Path $PWD "static/img/atos_docs_sol.svg"
+$pngPath = Join-Path $PWD "static/img/atos_docs_sol.png"
+
+$svgPath = Join-Path $PWD "static/img/atos_prod_catalog.svg"
+$pngPath = Join-Path $PWD "static/img/atos_prod_catalog.png"
+
+
+$svg = Get-Content $svgPath -Raw
+$base64 = [regex]::Match($svg,'base64,([^"]+)').Groups[1].Value
+
+[IO.File]::WriteAllBytes(
+    $pngPath,
+    [Convert]::FromBase64String($base64)
+)
+
+Get-Item .\static\img\atos_agentic_ai.png
+
+# concert images
+magick static/img/atos_agentic_ai.png static/img/atos_agentic_ai.webp
+magick static/img/atos_docs_sol.png static/img/atos_docs_sol.webp
+magick static/img/atos_prod_catalog.png static/img/atos_prod_catalog.webp
+```
+
+Or run this script:
+
+```powershell
+$ErrorActionPreference = "Stop"
+
+$files = @(
+    "atos_agentic_ai",
+    "atos_docs_sol",
+    "atos_prod_catalog"
+)
+
+$imgDir = Join-Path $PWD "static\img"
+
+foreach ($file in $files) {
+    $svgPath  = Join-Path $imgDir "$file.svg"
+    $pngPath  = Join-Path $imgDir "$file.png"
+    $webpPath = Join-Path $imgDir "$file.webp"
+
+    Write-Host "Processing $file..."
+
+    $svg = Get-Content $svgPath -Raw
+    $match = [regex]::Match($svg, 'base64,([^"]+)')
+
+    if (-not $match.Success) {
+        Write-Warning "No embedded base64 image found in $svgPath"
+        continue
+    }
+
+    $base64 = $match.Groups[1].Value
+    [IO.File]::WriteAllBytes($pngPath, [Convert]::FromBase64String($base64))
+
+    magick $pngPath -quality 85 $webpPath
+
+    Write-Host "Created $webpPath"
+}
+
+Write-Host "Done."
+```
+
+## 11. Render external docs locally
+
+Make sure that you have configured
+[SSH](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account)
+to pull from github, then proceed with the following
+
+```powershell
+# Check for existing SSH keys
+ls -Force ~/.ssh
+# If there are 0 known_hosts, then generate a new SSH key and add it to your GitHub account
+
+# Generate key (Ed25519 is a modern cryptographic algorithm used to create SSH key pairs)
+ssh-keygen -t ed25519 -C "robertvanvugt@outlook.com"
+# When asked where to save the key, press Enter to accept the default location: C:\Users\A168579\.ssh\id_ed25519
+# When asked for a passphrase, enter one for recommended extra protection. GitHub notes that the SSH agent can remember the passphrase so you do not need to type it every time.
+
+# In Admin PowerShell (This is a one-time action to enable the ssh-agent service, it must be run in an elevated PowerShell prompt)
+Get-Service -Name ssh-agent | Set-Service -StartupType Manual
+Start-Service ssh-agent
+
+# In normal PowerShell
+ssh-add $HOME\.ssh\id_ed25519
+
+# Copy public key
+Get-Content $HOME\.ssh\id_ed25519.pub | Set-Clipboard
+
+# Optional Git for Windows fix: force Git to use Windows OpenSSH
+# On Windows, Git for Windows can sometimes use its own bundled SSH instead of the Windows SSH agent. GitHub documents this as a possible conflict and recommends forcing Git to use the system OpenSSH binary
+git config --global core.sshCommand "C:/Windows/System32/OpenSSH/ssh.exe"
+
+# Add the public key to your GitHub account using the GitHub web interface:
+# In GitHub:
+# Go to Settings
+# Go to SSH and GPG keys
+# Click New SSH key
+# Give it a title, for example: A168579 Windows laptop
+# Paste the copied public key
+# Save it
+
+
+# ALTERNATIVE: Add the public key to your GitHub account using the GitHub CLI (gh):
+gh auth login
+# Select GitHub.com
+
+# Add the public key to your GitHub account:
+gh ssh-key add $HOME\.ssh\id_ed25519.pub --title "Atos Windows laptop"
+
+###########################
+# Test
+ssh -T git@github.com
+# The first time, you may be asked whether you trust GitHub’s host key. Type: yes
+# A successful result usually looks like: Hi <username>! You've successfully authenticated, but GitHub does not provide shell access.
+
+```
+
+### Viewing external documentation locally
+
+The documentation pipeline copies external documentation into the Docusaurus project before building the site. To reproduce this locally, run the following commands from the `pe-docs/` folder:
+
+```bash
+npm run merge
+npm run start
+```
+
+The `merge` step copies the external documentation into the local documentation tree, after which `npm run start` starts the local Docusaurus development server.
+
+After testing, remove the copied external documentation before committing changes. First run a dry run to review what Git will remove:
+
+```bash
+git clean -fdn
+```
+
+If the output only contains generated or copied documentation that should be removed, run:
+
+```bash
+git clean -fd
+```
+
+Be careful: `git clean -fd` removes all untracked files and directories in the current repository path. Do not run it if the dry run shows local work-in-progress or files you still need.
+
+
 ## References
 
 [1]: https://docusaurus.io/docs/installation "Installation"
