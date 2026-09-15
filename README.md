@@ -905,6 +905,9 @@ ssh -T git@github.com
 # The first time, you may be asked whether you trust GitHub’s host key. Type: yes
 # A successful result usually looks like: Hi <username>! You've successfully authenticated, but GitHub does not provide shell access.
 
+# You still need to authorize the authentication key for SSO.
+
+![SSO](./media/SSO.png)
 ```
 
 ### Viewing external documentation locally
@@ -932,6 +935,42 @@ git clean -fd
 
 Be careful: `git clean -fd` removes all untracked files and directories in the current repository path. Do not run it if the dry run shows local work-in-progress or files you still need.
 
+## 12. Change to Static Azure Webapp with Entra ID authentication
+
+### Construct the URL for Azure AD authentication using the OpenID Connect implicit flow
+
+This step is to confirm whether we are allowed to authenticate with Azure AD using the OpenID Connect implicit flow.
+
+```powershell
+
+# Construct the URL for Azure AD authentication using the OpenID Connect implicit flow
+
+$corporateTenantId = "<CORPORATE-TENANT-ID>"
+$clientId = "<APPLICATION-CLIENT-ID>"
+
+$redirectUri = [uri]::EscapeDataString("https://jwt.ms")
+$scope = [uri]::EscapeDataString("openid profile email")
+$nonce = [guid]::NewGuid().ToString()
+$state = [guid]::NewGuid().ToString()
+
+$url = "https://login.microsoftonline.com/$corporateTenantId/oauth2/v2.0/authorize" +
+    "?client_id=$clientId" +
+    "&response_type=id_token" +
+    "&redirect_uri=$redirectUri" +
+    "&response_mode=fragment" +
+    "&scope=$scope" +
+    "&nonce=$nonce" +
+    "&state=$state" +
+    "&prompt=select_account"
+
+$url
+```
+
+## Request Admin Consent
+
+If the application requires admin consent for certain permissions, request it by navigating to the constructed URL in a browser and signing in with an admin account. This will prompt the admin to grant the necessary permissions for the application.
+
+[Request Admin Consent](https://pisa.myatos.net/home?id=sc_cat_item&sys_id=02d0155ddb80ca50454964ebd396199d&sysparm_category=5ecc2e63dba788903faba6b605961985)
 
 ## References
 
