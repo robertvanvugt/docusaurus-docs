@@ -1234,6 +1234,59 @@ DEV2 Entra tenant
 
 This is intentionally the same boundary that corporate IAM will later approve.
 
+### Troubleshooting
+
+If you cannot access the Web App using the DEV2 account, ensure that no policies are blocking access, such as conditional access policies or network restrictions.
+
+See whether the Web App is running and has public network access using the following command:
+
+```powershell
+az webapp show `
+    --resource-group "rg-platform-docs-dev" `
+    --name "pe-docs-webapp-hfnpizw5aao4w" `
+    --query "{state:state,publicNetworkAccess:publicNetworkAccess}" `
+    --output json
+```
+
+If not enabled there might be a policy that sets public network access to Disabled, for example, the assignment of a built-in policy named "Configure App Service apps to disable public network access" with a Modify effect. That is exactly capable of changing your requested Enabled value to Disabled during deployment.
+
+Get the resource id:
+
+```powershell
+$webAppResourceId = az webapp show `
+    --resource-group "rg-platform-docs-dev" `
+    --name "pe-docs-webapp-hfnpizw5aao4w" `
+    --query id `
+    --output tsv
+```
+
+```powershell
+az policy state list `
+    --resource $webAppResourceId `
+    --query "[].{Assignment:policyAssignmentName,Definition:policyDefinitionName,Compliance:complianceState}" `
+    --output table
+```
+
+```powershell
+$policyStates = az policy state list `
+    --resource $webAppResourceId `
+    --output json `
+    | ConvertFrom-Json
+
+$matchingPolicy = $policyStates |
+    Where-Object {
+        $_.policyDefinitionName -eq 'appservice-disablepublicnetworkaccess-change-policy-def'
+    }
+
+$matchingPolicy |
+    Select-Object `
+        policyAssignmentId,
+        policyAssignmentName,
+        policyDefinitionName,
+        policyDefinitionReferenceId,
+        complianceState
+```
+
 ## 19. Verify the DEV2 Enterprise Application
 
 Switch to DEV2:

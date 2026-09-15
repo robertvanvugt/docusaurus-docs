@@ -5,6 +5,7 @@ param config = {
     name: 'pe-docs-app-service-plan-dev'
     os: 'Linux'
     skuName: 'B1'
+    skuCapacity: 1
     tags: {
       application: 'platform-docs'
       costCenter: 'NL.W04723.060'
@@ -61,6 +62,14 @@ param config = {
   }
   enableTelemetry: false
   location: 'westeurope'
+  policyExemption: {
+    description: 'Allows the internal documentation Web App to expose its public endpoint. Application access is protected by Microsoft Entra Easy Auth and tenant restrictions.'
+    displayName: 'Platform documentation public App Service endpoint'
+    exemptionCategory: 'Waiver'
+    name: 'pe-docs-public-network-access'
+    policyAssignmentName: 'lz01-d-appservice-change-policy-set-assignment'
+    policyDefinitionReferenceId: '8739958994701639919'
+  }
   resourceGroup: {
     name: 'rg-platform-docs-dev'
     tags: {

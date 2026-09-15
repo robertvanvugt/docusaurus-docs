@@ -29,9 +29,35 @@ resource docsResourceGroup 'Microsoft.Resources/resourceGroups@2025-04-01' exist
   ]
 }
 
+// ──────── Policy Exemption ────────
+
+var enablePolicyExemption = config.?policyExemption != null
+
+var policyAssignmentResourceId = enablePolicyExemption
+  ? subscriptionResourceId(
+      'Microsoft.Authorization/policyAssignments',
+      config.policyExemption!.policyAssignmentName
+    )
+  : ''
+
+module publicNetworkAccessPolicyExemption 'policy-exemption.bicep' = if (enablePolicyExemption) {
+  name: '${uniqueString(deployment().name, config.location)}-policyExemption-deployment'
+  scope: docsResourceGroup
+  params: {
+    config: {
+      description: config.policyExemption!.description
+      displayName: config.policyExemption!.displayName
+      exemptionCategory: config.policyExemption!.exemptionCategory
+      name: config.policyExemption!.name
+      policyAssignmentId: policyAssignmentResourceId
+      policyDefinitionReferenceId: config.policyExemption!.policyDefinitionReferenceId
+    }
+  }
+}
+
 // ──────── App Service Plan ────────
 
-module appServicePlan 'br:pebiceptemplatesprod.azurecr.io/bicep/resource/appserviceplan/appserviceplan:v1.0.0' = {
+module appServicePlan 'br:pebiceptemplatesprod.azurecr.io/bicep/resource/appserviceplan/appserviceplan:v1.0.1' = {
   name: '${uniqueString(deployment().name, config.location)}-appServicePlan-deployment'
   scope: docsResourceGroup
   params: {
@@ -40,6 +66,7 @@ module appServicePlan 'br:pebiceptemplatesprod.azurecr.io/bicep/resource/appserv
       name: config.appServicePlan.name
       os: config.appServicePlan.os
       skuName: config.appServicePlan.skuName
+      skuCapacity: config.appServicePlan.skuCapacity
       tags: config.appServicePlan.tags
     }
   }
@@ -134,6 +161,9 @@ var webAppSettings = union(
 module webApp 'br/public:avm/res/web/site:0.23.1' = {
   name: '${uniqueString(deployment().name, config.location)}-webApp-deployment'
   scope: docsResourceGroup
+  dependsOn: [
+    publicNetworkAccessPolicyExemption
+  ]
   params: {
     basicPublishingCredentialsPolicies: config.webApp.basicPublishingCredentialsPolicies
     clientAffinityEnabled: config.webApp.clientAffinityEnabled
@@ -244,6 +274,10 @@ type AppServicePlanConfig = {
   @description('Required: SKU of the App Service Plan.')
   skuName: 'B1' | 'B2' | 'B3' | 'S1' | 'S2' | 'S3' | 'P0v3' | 'P1v3' | 'P2v3' | 'P3v3'
 
+  @description('Required: Number of workers associated with the App Service Plan. Defaults to 3 to preserve the existing module behavior.')
+  @minValue(1)
+  skuCapacity: int
+
   @description('Required: Resource tags.')
   tags: object
 }
@@ -326,6 +360,26 @@ type DeploymentIdentityConfig = {
   webAppRole: 'Website Contributor'
 }
 
+type PolicyExemptionConfig = {
+  @description('Required: Description of the policy exemption.')
+  description: string
+
+  @description('Required: Display name of the policy exemption.')
+  displayName: string
+
+  @description('Required: Exemption category.')
+  exemptionCategory: 'Mitigated' | 'Waiver'
+
+  @description('Required: Name of the policy exemption.')
+  name: string
+
+  @description('Required: Name of the subscription-scoped policy assignment.')
+  policyAssignmentName: string
+
+  @description('Required: Reference ID of the policy definition within the assigned initiative.')
+  policyDefinitionReferenceId: string
+}
+
 type ResourceGroupConfig = {
   @description('Required: Name of the Resource Group.')
   @minLength(3)
@@ -402,6 +456,9 @@ type DocsWebAppPattern = {
 
   @description('Required: Resource Group configuration.')
   resourceGroup: ResourceGroupConfig
+
+  @description('Optional: Policy exemption configuration.')
+  policyExemption: PolicyExemptionConfig?
 
   @description('Required: Web App configuration.')
   webApp: WebAppConfig
