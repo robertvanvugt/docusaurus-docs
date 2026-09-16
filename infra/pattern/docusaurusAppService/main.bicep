@@ -126,6 +126,10 @@ resource authenticationApplication 'Microsoft.Graph/applications@v1.0' = {
   signInAudience: config.authentication.signInAudience
   web: {
     homePageUrl: webAppUrl
+    implicitGrantSettings: {
+      enableAccessTokenIssuance: false
+      enableIdTokenIssuance: true
+    }
     redirectUris: [
       authenticationCallbackUrl
     ]

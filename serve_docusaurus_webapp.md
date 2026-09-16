@@ -1222,7 +1222,16 @@ Authenticate using your **DEV2 administrator account**.
 
 Because this is a new unverified multitenant application, DEV2 may require administrator approval.
 
-Grant consent on behalf of the DEV2 organization when prompted.
+Grant **consent on behalf of the DEV2 organization** when prompted.
+
+Select **"Consent on behalf of your organization."** That creates an Enterprise Application/service principal in the Atos tenant and grants those delegated permissions, so individual employees do not have to approve the app themselves on first login.
+
+The application requests only delegated sign-in permissions required for Microsoft Entra authentication: basic user profile information and offline_access to maintain the authenticated session. It does not request access to mail, files, SharePoint, Teams, or privileged Microsoft Graph data. We request tenant-wide admin consent so employees can access the documentation portal without individual consent prompts.
+
+The permissions requested are very limited and appropriate for this scenario:
+
+* **View users' basic profile** lets the application identify the signed-in user and obtain basic profile information.
+* **Maintain access to data you have given it access to** is offline_access. It allows refresh tokens so the authenticated session can be maintained without forcing the user to sign in again whenever tokens expire. It does not by itself grant access to mail, files, Teams, SharePoint, directory data, etc.
 
 The result should create:
 
@@ -1234,7 +1243,7 @@ DEV2 Entra tenant
 
 This is intentionally the same boundary that corporate IAM will later approve.
 
-### Troubleshooting
+### Troubleshooting (skip if not applicable)
 
 If you cannot access the Web App using the DEV2 account, ensure that no policies are blocking access, such as conditional access policies or network restrictions.
 
@@ -1287,6 +1296,8 @@ $matchingPolicy |
         complianceState
 ```
 
+Our Bicep already created the option to exempt the public network access policy, you do need to add the appropriate policy id in the bicepparams file for the target environment.
+
 ## 19. Verify the DEV2 Enterprise Application
 
 Switch to DEV2:
@@ -1306,6 +1317,12 @@ and:
 Assignment required:
 No
 ```
+
+See the screenshots below for reference.
+
+![Enterprise applications](./media/enterprise-applications.png)
+
+![Enterprise application properties](./media/enterprise-application-properties.png)
 
 We want all DEV2 users to be eligible without individual assignment.
 
