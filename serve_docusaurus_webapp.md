@@ -1407,6 +1407,87 @@ These are identifiers, not credentials.
 
 There are **no GitHub secrets required for Azure deployment**.
 
+Playing with some powershell to automate GitHub environment setup.
+
+```powershell
+##############################################################################
+# 6. Configure GitHub using GitHub CLi                                       #
+##############################################################################
+
+# If needed install GitHub CLI (Only needed once, requires elevated admin priviliges on the local system, and a restart of the powershell window)
+choco install gh -y
+
+# Check version
+gh --version
+
+# Authenticate to GitHub using an account with appropriate rights
+gh auth login -h github.com -s admin:org
+
+# Now, because we can, we can load the config from the bicepparams file to extract the values we used earlier
+$bicepParamPath = '.\infra\pattern\docusaurusAppService\main.bicepparam'
+
+$bicepParams = az bicep build-params `
+    --file $bicepParamPath `
+    --stdout `
+    | ConvertFrom-Json # convert the Bicep parameters output to a PowerShell object
+
+$config = ($bicepParams.parametersJson | ConvertFrom-Json).parameters.config.value
+
+# Create a new GitHub environment for the specified environment code.
+
+$githubOrganization = $config.deploymentIdentity.repository.Split('/')[0]
+$githubRepository = $config.deploymentIdentity.repository.Split('/')[1]
+$githubEnvironmentCode = $config.deploymentIdentity.environmentName
+
+gh api -X PUT "https://api.github.com/repos/$githubOrganization/$githubRepository/environments/$githubEnvironmentCode"
+
+# Set up GitHub environment variables for the newly created environment
+
+$tenantId = $dev_tenant_id
+$subscriptionId = $dev_lz01_sub_id
+
+$deploymentClientId = (
+  az identity show `
+    --name $config.deploymentIdentity.name `
+   --resource-group $config.resourceGroup.name | ConvertFrom-Json).clientId
+
+$webAppName = (
+  az webapp list `
+    --subscription $subscriptionId `
+    --resource-group $config.resourceGroup.name `
+    --query "[].name | [?starts_with(@, '$($config.webApp.namePrefix)')]" | ConvertFrom-Json)[0]
+
+$GitHubEnvVarsMap = [ordered]@{
+    "$($githubEnvironmentCode.ToUpper())_TENANT_ID"       = $tenantId
+    "$($githubEnvironmentCode.ToUpper())_CLIENT_ID"       = $deploymentClientId
+    "$($githubEnvironmentCode.ToUpper())_SUBSCRIPTION_ID" = $subscriptionId
+    "$($githubEnvironmentCode.ToUpper())_WEBAPP_NAME"     = $webAppName
+}
+
+function Set-GitHubEnvironmentVariable {
+    [CmdletBinding()]
+    param (
+        [Parameter(Position = 0, Mandatory)]
+        [ValidateNotNullOrEmpty()]
+        [string]$envVarKey,
+
+        [Parameter(Position = 1, Mandatory)]
+        [ValidateNotNullOrEmpty()]
+        [string]$envVarValue
+    )
+
+    gh api -X PUT "https://api.github.com/repos/$githubOrganization/$githubRepository/environments/$githubEnvironmentCode/secrets/$envVarKey" `
+        -F "encrypted_value=$envVarValue"
+}
+
+# Create environment variables for the GitHub environment
+# Loop through the GitHubEnvVarsMap and set each environment variable using the Set-GitHubEnvironmentVariable function
+foreach ($envVarKey in $GitHubEnvVarsMap.Keys) {
+    $envVarValue = $GitHubEnvVarsMap[$envVarKey]
+    Set-GitHubEnvironmentVariable -envVarKey $envVarKey -envVarValue $envVarValue
+}
+```
+
 ## 23. Update Docusaurus hosting configuration
 
 Your current GitHub Pages configuration may resemble:
